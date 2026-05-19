@@ -1,4 +1,4 @@
-// Add at the very top of server.js
+// Add at the very top of app.js
 process.on('uncaughtException', (err) => {
     console.error('UNCAUGHT EXCEPTION:', err.message);
     console.error(err.stack);
