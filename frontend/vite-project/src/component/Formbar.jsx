@@ -1,5 +1,4 @@
 import react from 'react';
-import './Formbar.css';
 import { useState } from 'react';
 import { FaUser } from "react-icons/fa6";
 import { MdOutlineEmail } from "react-icons/md";
