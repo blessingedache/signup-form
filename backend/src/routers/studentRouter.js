@@ -3,7 +3,8 @@ import {
     registerStudent, 
     getAllUser,   // ✅ use this for the /users route
     loginUser, 
-    logoutUser 
+    logoutUser,
+    postMedia
 } from '../controllers/studentcontroller.js';
 
 import { authMiddleware } from "../middlewares/authorization.js";
@@ -15,6 +16,7 @@ router.post('/register', registerStudent)
 router.get('/register', getAllUser)
 
 router.get("/users", authMiddleware, getAllUser);
+router.post("/uploads", postMedia);
 
 router.post("/login", loginUser);
 router.post("/logout", logoutUser);

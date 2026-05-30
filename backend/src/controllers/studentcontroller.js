@@ -1,6 +1,7 @@
-import User from '../models/userModel.js';      // ✅ renamed from userModel → User
-import Student from '../models/studentmodel.js';
+import User from '../models/userModel.js';   
+import file from '../models/imageModel.js';      // ✅ renamed from imageModel → file
 import bcrypt from 'bcryptjs';
+import Student from '../models/studentmodel.js';
 import { sendEmail } from '../middlewares/email.js';
 import jwt from 'jsonwebtoken';
 
@@ -104,3 +105,54 @@ export const allusers = async (req, res) => {
         res.status(500).json({ message: "internal server error" });
     }
 };
+
+
+
+//image upload controller
+
+export const postMedia = async (req, res) => {
+    try{
+       
+        //check if the files exists
+        if (!req.files || !req.files.image) {
+            return res.status(400).json({ message: "No image uploaded" });
+        }
+        //get the images
+         const image = req.files.image;
+
+         //allowed image/file types
+         const allowedTypes = [
+            "image/jpeg", 
+            "image/png", 
+            "image/jpg",
+        ];
+
+        //validate file types
+        if(!allowedTypes.includes(image.mimetype)) {
+            return res.status(400).json({ message: "Invalid file type. Only JPEG, PNG, and JPG are allowed." });
+        }
+
+        //create a unique name for our media assets
+        const filename = `${Date.now()}-${image.name}`;
+
+        //file path to store the image
+        const uploadFilePath = `./uploads/${filename}`;
+
+        //move image to the folder
+        await image.mv(uploadFilePath);
+
+        //save image info to database
+        const savedImage = await file.create({
+            filename: filename,
+            path: uploadFilePath,
+            mimetype: image.mimetype
+        });
+
+        return res.status(201).json({ 
+            success: true,
+            message: "Image uploaded successfully", image: savedImage });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ message: "Internal server error" });
+    }
+    }

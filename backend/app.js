@@ -3,15 +3,23 @@ import dotenv from 'dotenv';
 dotenv.config();
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import fileUpload from 'express-fileupload';
 
 import express from 'express';
 import mongoose from 'mongoose';
 import studentRoutes from "./src/routers/studentRouter.js";
 
 const app = express();
-const port = process.env.PORT || 4000;
 
 // Middleware
+app.use(fileUpload({
+    useTempFiles: true, 
+}));
+
+//middlewares to render static files like images from the uploads folder
+app.use('/uploads', express.static('uploads'));
+
+const port = process.env.PORT || 4000;
 app.use(express.json());
 
 // Connect to database
@@ -29,7 +37,10 @@ connectingDatabase();
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors()); //allows you to acess your backend from your frontend without any error of cors policy 
+app.use(cors({
+    origin: "https://blessingedache-signup-form-i2pv.vercel.app",
+    credentials: true
+})); //allows you to acess your backend from your frontend without any error of cors policy 
 
 
 //end point for home
