@@ -38,12 +38,19 @@ connectingDatabase();
 app.use(express.json());
 app.use(cookieParser());
 // ✅ With this
+// ✅ This allows ALL your Vercel deployments permanently
 app.use(cors({
-    origin: [
-        "https://blessingedache-signup-form-i2pv.vercel.app",
-        "https://blessingedache-signup-form-826nvthl9-blessing-edaches-projects.vercel.app",
-        "https://blessingedache-signup-form-jrvz0p2bp-blessing-edaches-projects.vercel.app"
-    ],
+    origin: function (origin, callback) {
+        const allowedPatterns = [
+            /^https:\/\/blessingedache-signup-form.*\.vercel\.app$/,
+            /^https:\/\/blessingedache-signup-form-i2pv\.vercel\.app$/
+        ];
+        if (!origin || allowedPatterns.some(pattern => pattern.test(origin))) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     credentials: true
 }));//allows you to acess your backend from your frontend without any error of cors policy 
 
