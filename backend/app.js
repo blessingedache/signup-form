@@ -37,10 +37,15 @@ connectingDatabase();
 
 app.use(express.json());
 app.use(cookieParser());
+// ✅ With this
 app.use(cors({
-    origin: "https://blessingedache-signup-form-i2pv.vercel.app",
+    origin: [
+        "https://blessingedache-signup-form-i2pv.vercel.app",
+        "https://blessingedache-signup-form-826nvthl9-blessing-edaches-projects.vercel.app",
+        "https://blessingedache-signup-form-jrvz0p2bp-blessing-edaches-projects.vercel.app"
+    ],
     credentials: true
-})); //allows you to acess your backend from your frontend without any error of cors policy 
+}));//allows you to acess your backend from your frontend without any error of cors policy 
 
 
 //end point for home
@@ -53,10 +58,9 @@ app.use("/api/v1", studentRoutes);
 app.use('/api/v1/auth', studentRoutes);
 
 
-app.listen(4000, () => {
-    console.log("server is running on port 4000");
+app.listen(port, () => {
+    console.log(`server is running on port ${port}`);
 });
-
 
 //json web token is a package that allows you to create and verify tokens for authentication and authorization in your application. It is commonly used in web applications to 
 // manage user sessions and secure API endpoints. 
