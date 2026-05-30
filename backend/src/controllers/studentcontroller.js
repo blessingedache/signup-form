@@ -30,20 +30,22 @@ export const registerStudent = async (req, res) => {
                    <p>Best regards,<br/>The Team</p>`
         });
 
-        res.status(201).json({ message: 'Student registered successfully', student: newStudent });
+        
 
-    } catch (error) {
-        console.error(error.message);
+    } catch (emailError) {
+        console.error("Email failed (non-critical):", emailError.message);
         res.status(500).json({ message: 'Internal server error' });
     }
+
+    res.status(201).json({ message: 'Student registered successfully', student: newStudent });
 };
 
 export const getAllUser = async (req, res) => {
     try {
         const alldata = await Student.find();
         res.status(200).json({ message: "all data fetched", alldata });
-    } catch (error) {
-        console.log(error.message);
+    } catch (emailError) {
+        console.error(emailError.message);
         res.status(500).json({ message: 'Internal server error' });
     }
 };
@@ -85,8 +87,9 @@ export const loginUser = async (req, res) => {
             token
         });
 
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    } catch (emailError) {
+        console.error(emailError.message);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
 
@@ -100,9 +103,9 @@ export const allusers = async (req, res) => {
     try {
         const getalluser = await User.find();  //populate all users from User collection
         res.status(200).json({ message: "all users fetched", getalluser });
-    } catch (error) {
-        console.log(error.message);
-        res.status(500).json({ message: "internal server error" });
+    } catch (emailError) {
+        console.error(emailError.message);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
 
@@ -151,8 +154,8 @@ export const postMedia = async (req, res) => {
         return res.status(201).json({ 
             success: true,
             message: "Image uploaded successfully", image: savedImage });
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).json({ message: "Internal server error" });
+    } catch (emailError) {
+        console.error(emailError.message);
+        res.status(500).json({ message: 'Internal server error' });
     }
     }
