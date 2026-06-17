@@ -24,6 +24,8 @@ const Formbar = () => {
   const changeData = (e) => {
     setFormsData({ ...formsData, [e.target.name]: e.target.value });
     setStatus("");
+    setMessage("");
+    setError("");
   };
 
   async function handleSubmit(e) {
@@ -55,7 +57,7 @@ const Formbar = () => {
 
       if (response.ok) {
         setMessage(data.message || "Registration successful!");
-        setStatus("success"); // ✅ turns button green + changes text to "Submit"
+        setStatus("success"); // ✅ turns button green
         setFormsData({
           firstName: "",
           lastName: "",
@@ -69,7 +71,7 @@ const Formbar = () => {
       }
     } catch (err) {
       setError("Cannot connect to server. Please try again later.");
-      setStatus("error"); // ❌ was missing before — now added
+      setStatus("error");
       console.error("Submit error:", err);
     } finally {
       setLoading(false);
@@ -85,10 +87,11 @@ const Formbar = () => {
     transition: "background-color 0.3s ease",
   };
 
-  // Button label based on status
+  // Button label based on status ✅ FIXED
   const buttonLabel =
-    loading          ? "Submitting..." :
-    status === "success" ? "Submit"    : "Sign Up";
+    loading              ? "Submitting..."             :
+    status === "success" ? "Registered Successfully ✓" :
+    status === "error"   ? "Registration Failed ✗"     : "Sign Up";
 
   return (
     <div className="formbar">
