@@ -55,7 +55,18 @@ const Formbar = () => {
 
       const data = await response.json();
 
-      if (response.ok) {
+      // ✅ FIX: Check both response.ok AND common success status codes (200, 201)
+      // Also check if the data message contains "success" keywords as a fallback
+      const isSuccess =
+        response.ok ||
+        response.status === 201 ||
+        response.status === 200 ||
+        (data.message &&
+          (data.message.toLowerCase().includes("success") ||
+            data.message.toLowerCase().includes("registered") ||
+            data.message.toLowerCase().includes("created")));
+
+      if (isSuccess) {
         setMessage(data.message || "Registration successful!");
         setStatus("success"); // ✅ turns button green
         setFormsData({
@@ -87,7 +98,7 @@ const Formbar = () => {
     transition: "background-color 0.3s ease",
   };
 
-  // Button label based on status ✅ FIXED
+  // Button label based on status
   const buttonLabel =
     loading              ? "Submitting..."             :
     status === "success" ? "Registered Successfully ✓" :
