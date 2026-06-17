@@ -1,5 +1,5 @@
 import User from '../models/userModel.js';   
-import file from '../models/imageModel.js';      // ✅ renamed from imageModel → file
+import file from '../models/imageModel.js';
 import bcrypt from 'bcryptjs';
 import Student from '../models/studentmodel.js';
 import { sendEmail } from '../middlewares/email.js';
@@ -18,34 +18,43 @@ export const registerStudent = async (req, res) => {
             return res.status(400).json({ message: 'Email already registered' });
         }
 
+        // ✅ newStudent is created inside the try block
         const newStudent = await Student.create({
             firstName, lastName, email, userName, password
         });
 
-        await sendEmail({
-            to: newStudent.email,
-            subject: "Welcome to our platform",
-            html: `<h1>Dear ${newStudent.firstName},</h1>
-                   <p>Thank you for registering. We are excited to have you!</p>
-                   <p>Best regards,<br/>The Team</p>`
+        // ✅ Send email but don't let it crash the registration
+        try {
+            await sendEmail({
+                to: newStudent.email,
+                subject: "Welcome to our platform",
+                html: `<h1>Dear ${newStudent.firstName},</h1>
+                       <p>Thank you for registering. We are excited to have you!</p>
+                       <p>Best regards,<br/>The Team</p>`
+            });
+        } catch (emailError) {
+            // Email failed but registration was successful — just log it
+            console.error("Email failed (non-critical):", emailError.message);
+        }
+
+        // ✅ Send success response inside the try block where newStudent exists
+        return res.status(201).json({ 
+            message: 'Student registered successfully', 
+            student: newStudent 
         });
 
-        
-
-    } catch (emailError) {
-        console.error("Email failed (non-critical):", emailError.message);
-        res.status(500).json({ message: 'Internal server error' });
+    } catch (error) {
+        console.error("Registration error:", error.message);
+        return res.status(500).json({ message: 'Internal server error' });
     }
-
-    res.status(201).json({ message: 'Student registered successfully', student: newStudent });
 };
 
 export const getAllUser = async (req, res) => {
     try {
         const alldata = await Student.find();
         res.status(200).json({ message: "all data fetched", alldata });
-    } catch (emailError) {
-        console.error(emailError.message);
+    } catch (error) {
+        console.error(error.message);
         res.status(500).json({ message: 'Internal server error' });
     }
 };
@@ -54,7 +63,6 @@ export const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // ✅ Search in Student collection, not User
         const user = await Student.findOne({ email });
         if (!user) {
             return res.status(404).json({ message: "User not found" });
@@ -87,8 +95,8 @@ export const loginUser = async (req, res) => {
             token
         });
 
-    } catch (emailError) {
-        console.error(emailError.message);
+    } catch (error) {
+        console.error(error.message);
         res.status(500).json({ message: 'Internal server error' });
     }
 };
@@ -98,53 +106,39 @@ export const logoutUser = (req, res) => {
     res.status(200).json({ message: "Logout successful" });
 };
 
-
 export const allusers = async (req, res) => {
     try {
-        const getalluser = await User.find();  //populate all users from User collection
+        const getalluser = await User.find();
         res.status(200).json({ message: "all users fetched", getalluser });
-    } catch (emailError) {
-        console.error(emailError.message);
+    } catch (error) {
+        console.error(error.message);
         res.status(500).json({ message: 'Internal server error' });
     }
 };
 
-
-
-//image upload controller
-
 export const postMedia = async (req, res) => {
-    try{
-       
-        //check if the files exists
+    try {
         if (!req.files || !req.files.image) {
             return res.status(400).json({ message: "No image uploaded" });
         }
-        //get the images
-         const image = req.files.image;
 
-         //allowed image/file types
-         const allowedTypes = [
+        const image = req.files.image;
+
+        const allowedTypes = [
             "image/jpeg", 
             "image/png", 
             "image/jpg",
         ];
 
-        //validate file types
-        if(!allowedTypes.includes(image.mimetype)) {
+        if (!allowedTypes.includes(image.mimetype)) {
             return res.status(400).json({ message: "Invalid file type. Only JPEG, PNG, and JPG are allowed." });
         }
 
-        //create a unique name for our media assets
         const filename = `${Date.now()}-${image.name}`;
-
-        //file path to store the image
         const uploadFilePath = `./uploads/${filename}`;
 
-        //move image to the folder
         await image.mv(uploadFilePath);
 
-        //save image info to database
         const savedImage = await file.create({
             filename: filename,
             path: uploadFilePath,
@@ -153,9 +147,12 @@ export const postMedia = async (req, res) => {
 
         return res.status(201).json({ 
             success: true,
-            message: "Image uploaded successfully", image: savedImage });
-    } catch (emailError) {
-        console.error(emailError.message);
+            message: "Image uploaded successfully", 
+            image: savedImage 
+        });
+
+    } catch (error) {
+        console.error(error.message);
         res.status(500).json({ message: 'Internal server error' });
     }
-    }
+}
