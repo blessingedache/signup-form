@@ -18,9 +18,12 @@ const Formbar = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [status, setStatus] = useState(""); // "success" | "error" | ""
 
+  // Resets button color when user starts typing again
   const changeData = (e) => {
     setFormsData({ ...formsData, [e.target.name]: e.target.value });
+    setStatus("");
   };
 
   async function handleSubmit(e) {
@@ -28,11 +31,13 @@ const Formbar = () => {
     setLoading(true);
     setMessage("");
     setError("");
+    setStatus("");
 
     const apiUrl = import.meta.env.VITE_API_URL;
 
     if (!apiUrl) {
       setError("Configuration error: API URL is not set. Please contact support.");
+      setStatus("error");
       setLoading(false);
       return;
     }
@@ -50,17 +55,40 @@ const Formbar = () => {
 
       if (response.ok) {
         setMessage(data.message || "Registration successful!");
-        setFormsData({ firstName: "", lastName: "", email: "", userName: "", password: "" });
+        setStatus("success"); // ✅ turns button green + changes text to "Submit"
+        setFormsData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          userName: "",
+          password: "",
+        });
       } else {
         setError(data.message || "Something went wrong. Please try again.");
+        setStatus("error"); // ❌ turns button red
       }
     } catch (err) {
       setError("Cannot connect to server. Please try again later.");
+      setStatus("error"); // ❌ was missing before — now added
       console.error("Submit error:", err);
     } finally {
       setLoading(false);
     }
   }
+
+  // Button styles based on status
+  const buttonStyle = {
+    backgroundColor:
+      status === "success" ? "green" :
+      status === "error"   ? "red"   : "",
+    color: status ? "white" : "",
+    transition: "background-color 0.3s ease",
+  };
+
+  // Button label based on status
+  const buttonLabel =
+    loading          ? "Submitting..." :
+    status === "success" ? "Submit"    : "Sign Up";
 
   return (
     <div className="formbar">
@@ -161,8 +189,14 @@ const Formbar = () => {
             <a href="#">Forget password?</a>
           </p>
 
-          <button className="btn" type="submit" disabled={loading}>
-            {loading ? "Submitting..." : "Sign Up"}
+          {/* Button changes color and text based on registration result */}
+          <button
+            className="btn"
+            type="submit"
+            disabled={loading}
+            style={buttonStyle}
+          >
+            {buttonLabel}
           </button>
 
           <div className="socials">
